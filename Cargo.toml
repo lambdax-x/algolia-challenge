@@ -4,4 +4,10 @@ version = "0.1.0"
 authors = ["λx.x <lambdax-x@users.noreply.github.com>"]
 
 [dependencies]
+itertools = "0.7.8"
 chrono = "0.4.5"
+hyper = "0.12"
+futures = "0.1"
+url = "1.7.1"
+percent-encoding = "1.0.1"
+serde_json = "1.0"

@@ -18,7 +18,7 @@ Endpoint: /1/queries/count/year[-month[-day[ hour[:minutes]]]]
 
 ## K most frequent queries in a time range
 
-Endpoint: /1/queries/popular/year[-month[-day[ hour[:minutes]]]]?count=n";
+Endpoint: /1/queries/popular/year[-month[-day[ hour[:minutes]]]]?size=n";
 
 /// Wrapper for percent decoding
 fn  decode_str_safe(data: &str) -> Option<String> {

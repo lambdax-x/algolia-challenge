@@ -8,8 +8,12 @@ extern crate url;
 extern crate percent_encoding;
 
 #[macro_use]
+extern crate rouste; // routing
+
+#[macro_use]
 extern crate serde_json; // json serialization
 
+pub mod time_range;
 pub mod monoid;
 pub mod tree;
 pub mod solver;

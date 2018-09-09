@@ -47,13 +47,18 @@ pub fn handle_request(req: Request<Body>, solver: &Solver) -> BoxedFuture {
 
 const DEFAULT_CONTENT: &'static str = "# Algolia interview challenge
 
+## Types
+
+- u32: 32 bits unsigned integer
+- TimeRange: YYYY[-MM[-DD[ hh[:mm]]]]
+
 ## Number of queries in a time range
 
-Endpoint: /1/queries/count/year[-month[-day[ hour[:minutes]]]]
+Endpoint: /<version: u32>/queries/count/<time range: TimeRange>
 
 ## K most frequent queries in a time range
 
-Endpoint: /1/queries/popular/year[-month[-day[ hour[:minutes]]]]?size=n";
+Endpoint: /<version: u32>/queries/popular/<time range: TimeRange>[?[size=<u32>]]";
 
 fn handle_default() -> (String, StatusCode) {
     (DEFAULT_CONTENT.to_string(), StatusCode::OK)

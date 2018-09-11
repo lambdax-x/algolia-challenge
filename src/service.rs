@@ -3,6 +3,7 @@ use time_range::TimeRange;
 
 use hyper;
 use hyper::{ Body, Request, Response, StatusCode };
+use hyper::header::{ HeaderValue, CONTENT_TYPE };
 use hyper::rt::Future;
 use futures::future;
 
@@ -11,6 +12,10 @@ use serde_json;
 use rouste::utils::*;
 
 type BoxedFuture = Box<Future<Item=Response<Body>, Error=hyper::Error> + Send>;
+
+type ContentType = &'static str;
+const CONTENT_TYPE_TEXT: ContentType = "text/plain";
+const CONTENT_TYPE_JSON: ContentType = "application/json";
 
 /// Decode URI and box response for hyper
 pub fn handle_request(req: Request<Body>, solver: &Solver) -> BoxedFuture {
@@ -33,7 +38,8 @@ pub fn handle_request(req: Request<Body>, solver: &Solver) -> BoxedFuture {
     let mut response = Response::new(Body::empty());
 
     match router(&uri) {
-        Some((content, status)) => {
+        Some((content_type, content, status)) => {
+            response.headers_mut().insert(CONTENT_TYPE, HeaderValue::from_static(content_type));
             *response.body_mut() = Body::from(content);
             *response.status_mut() = status;
         },
@@ -60,11 +66,11 @@ Endpoint: /<version: u32>/queries/count/<time range: TimeRange>[?[distinct]]
 
 Endpoint: /<version: u32>/queries/popular/<time range: TimeRange>[?[size=<u32>]]";
 
-fn handle_default() -> (String, StatusCode) {
-    (DEFAULT_CONTENT.to_string(), StatusCode::OK)
+fn handle_default() -> (ContentType, String, StatusCode) {
+    (CONTENT_TYPE_TEXT, DEFAULT_CONTENT.to_string(), StatusCode::OK)
 }
 
-fn handle_count(solver: &Solver, _version: u32, time_range: TimeRange, distinct: Option<()>) -> (String, StatusCode) {
+fn handle_count(solver: &Solver, _version: u32, time_range: TimeRange, distinct: Option<()>) -> (ContentType, String, StatusCode) {
     let count = match distinct {
         Some(_) => solver.query_distinct_count(&time_range.from, &time_range.to),
         _ => solver.query_count(&time_range.from, &time_range.to)
@@ -74,10 +80,10 @@ fn handle_count(solver: &Solver, _version: u32, time_range: TimeRange, distinct:
         "to": time_range.to.to_string(),
         "count": count
     }).to_string();
-    (body, StatusCode::OK)
+    (CONTENT_TYPE_JSON, body, StatusCode::OK)
 }
 
-fn handle_popular(solver: &Solver, _version: u32, time_range: TimeRange, size: Option<usize>) -> (String, StatusCode) {
+fn handle_popular(solver: &Solver, _version: u32, time_range: TimeRange, size: Option<usize>) -> (ContentType, String, StatusCode) {
     const DEFAULT_SIZE: usize = 10;
     let k_queries = solver.query_k_count(&time_range.from, &time_range.to, size.unwrap_or(DEFAULT_SIZE));
     let k_queries_json: serde_json::Value = k_queries.iter()
@@ -90,5 +96,5 @@ fn handle_popular(solver: &Solver, _version: u32, time_range: TimeRange, size: O
         "to": time_range.to.to_string(),
         "queries": k_queries_json
     }).to_string();
-    (body, StatusCode::OK)
+    (CONTENT_TYPE_JSON, body, StatusCode::OK)
 }

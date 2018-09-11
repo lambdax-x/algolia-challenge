@@ -27,6 +27,16 @@ operations and the tree requires O(N) storage (it is balanced and has N leafs). 
 and right bounds) these bounds can be used to query a segment tree and compute the number of queries in this range. This
 is also done in O(log N) operations, the segment tree also requires O(N) storage.
 
+### Distinct count
+
+Counting the number of distinct queries in a time range also uses the range tree to find the valid time range
+corresponding to the input. Each query identifier is added to the hash set. This requires O(N) space and O(N)
+operations. There are several papers on sub-linear distinct counting in large dataset, among them:
+
+- LogLog, *Marianne Durand and Philippe Flajolet*
+- HyperLogLog
+- Count-Min Sketch, *Graham Cormode*
+
 ### Counting popular queries
 
 Again, the range tree is used to find a valid time range. Counting queries in this range is done in a hash map, this

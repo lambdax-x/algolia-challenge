@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use std::collections::hash_map::{ DefaultHasher, HashMap };
+use std::collections::HashSet;
 use std::hash::{ Hash, Hasher };
 
 use tree::GenericTree;
@@ -111,6 +112,23 @@ impl Solver {
         match self.find_date_range_ids(from, to) {
             Some((from_id, to_id)) => {
                 self.segment_tree.query(from_id, to_id)
+            },
+
+            _ => 0
+        }
+    }
+
+    /// Query number of distinct queries in a range
+    pub fn query_distinct_count(&self, from: &Date, to: &Date) -> usize {
+        match self.find_date_range_ids(from, to) {
+            Some((from_id, to_id)) => {
+                let mut query_set: HashSet<QueryId> = HashSet::new();
+                for date_id in from_id .. to_id + 1 {
+                    for query_id in self.grouped_queries[date_id].iter() {
+                        query_set.insert(*query_id);
+                    }
+                }
+                query_set.len()
             },
 
             _ => 0

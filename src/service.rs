@@ -15,8 +15,8 @@ type BoxedFuture = Box<Future<Item=Response<Body>, Error=hyper::Error> + Send>;
 /// Decode URI and box response for hyper
 pub fn handle_request(req: Request<Body>, solver: &Solver) -> BoxedFuture {
     // Bind handlers with the solver
-    let binded_handle_count = |version: u32, time_range: TimeRange| {
-        handle_count(solver, version, time_range)
+    let binded_handle_count = |version: u32, time_range: TimeRange, distinct: Option<()>| {
+        handle_count(solver, version, time_range, distinct)
     };
 
     let binded_handle_popular = |version: u32, time_range: TimeRange, size: Option<usize>| {
@@ -26,7 +26,7 @@ pub fn handle_request(req: Request<Body>, solver: &Solver) -> BoxedFuture {
     let uri = format!("{}?{}", req.uri().path(), req.uri().query().unwrap_or_default());
 
     let router = route_with![ route!(/ => handle_default)
-                            , route!(/(version: u32)/queries/count/(time_range: TimeRange) => binded_handle_count)
+                            , route!(/(version: u32)/queries/count/(time_range: TimeRange)?distinct => binded_handle_count)
                             , route!(/(version: u32)/queries/popular/(time_range: TimeRange)?(size: usize) => binded_handle_popular)
                             ];
 
@@ -54,7 +54,7 @@ const DEFAULT_CONTENT: &'static str = "# Algolia interview challenge
 
 ## Number of queries in a time range
 
-Endpoint: /<version: u32>/queries/count/<time range: TimeRange>
+Endpoint: /<version: u32>/queries/count/<time range: TimeRange>[?[distinct]]
 
 ## K most frequent queries in a time range
 
@@ -64,11 +64,15 @@ fn handle_default() -> (String, StatusCode) {
     (DEFAULT_CONTENT.to_string(), StatusCode::OK)
 }
 
-fn handle_count(solver: &Solver, _version: u32, time_range: TimeRange) -> (String, StatusCode) {
+fn handle_count(solver: &Solver, _version: u32, time_range: TimeRange, distinct: Option<()>) -> (String, StatusCode) {
+    let count = match distinct {
+        Some(_) => solver.query_distinct_count(&time_range.from, &time_range.to),
+        _ => solver.query_count(&time_range.from, &time_range.to)
+    };
     let body = json!({
         "from": time_range.from.to_string(),
         "to": time_range.to.to_string(),
-        "count": solver.query_count(&time_range.from, &time_range.to)
+        "count": count
     }).to_string();
     (body, StatusCode::OK)
 }

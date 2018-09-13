@@ -33,9 +33,10 @@ Counting the number of distinct queries in a time range also uses the range tree
 corresponding to the input. Each query identifier is added to the hash set. This requires O(N) space and O(N)
 operations. There are several papers on sub-linear distinct counting in large dataset, among them:
 
-- LogLog, *Marianne Durand and Philippe Flajolet*
+- LogLog, Super-LogLog, *Marianne Durand and Philippe Flajolet*: http://algo.inria.fr/flajolet/Publications/DuFl03-LNCS.pdf
 - HyperLogLog
-- Count-Min Sketch, *Graham Cormode*
+- MinCount, *Frédéric Giroire*: http://www-sop.inria.fr/members/Frederic.Giroire/publis/Gi05.pdf
+- Count-Min Sketch, *Graham Cormode*: http://dimacs.rutgers.edu/~graham/pubs/papers/cmencyc.pdf
 
 ### Counting popular queries
 
